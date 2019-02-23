@@ -102,9 +102,12 @@ class Trainer(object):
     def _set_env_vars(self):
         env = self.make_env(0, add_monitor=False)
         self.ob_space, self.ac_space = env.observation_space, env.action_space
-        self.ob_mean, self.ob_std = random_agent_ob_mean_std(env)
+        self.ob_mean, self.ob_std = random_agent_ob_mean_std(env, 2)
+        if self.envs_per_process > 1:
+            self.envs = [functools.partial(self.make_env, i) for i in range(self.envs_per_process)]
+        else:
+            self.envs = [env]
         del env
-        self.envs = [functools.partial(self.make_env, i) for i in range(self.envs_per_process)]
 
     def train(self):
         self.agent.start_interaction(self.envs, nlump=self.hps['nlumps'], dynamics=self.dynamics)
