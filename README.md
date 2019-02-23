@@ -1,3 +1,11 @@
+# Curious Obstacle Tower
+
+Launch the network learning obstacle tower challenge by running the following command
+```bash
+python run.py --env_kind=obstacle_tower --envs_per_process=1
+```
+
+
 **Status:** Archive (code is provided as-is, no updates expected)
 
 ## Large-Scale Study of Curiosity-Driven Learning ##
