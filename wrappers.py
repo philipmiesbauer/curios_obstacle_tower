@@ -351,3 +351,10 @@ def make_robo_hockey(frame_stack=True):
         env = FrameStack(env, 4)
     env = AddRandomStateToInfo(env)
     return env
+
+def make_obstacle_tower():
+    from obstacle_tower_env import ObstacleTowerEnv
+
+    env = ObstacleTowerEnv('./obstacle-tower-env/ObstacleTower/ObstacleTower.x86_64', retro=True, realtime_mode=True)
+    return env
+
