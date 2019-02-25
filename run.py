@@ -105,7 +105,7 @@ class Trainer(object):
         env = self.make_env(0, add_monitor=False)
         self.ob_space, self.ac_space = env.observation_space, env.action_space
         self.ob_mean, self.ob_std = random_agent_ob_mean_std(env)
-        env.close();
+        env.close()
         print("Waiting for 1 minute to make sure socket is closed on Linux")
         sleep(60)
         del env
@@ -146,7 +146,7 @@ def make_env_all_params(rank, add_monitor, args):
         elif args["env"] == "hockey":
             env = make_robo_hockey()
     elif args["env_kind"] == 'obstacle_tower':
-        env = make_obstacle_tower()
+        env = make_obstacle_tower(rank)
 
     if add_monitor:
         env = Monitor(env, osp.join(logger.get_dir(), '%.2i' % rank))
@@ -192,7 +192,7 @@ def add_optimization_params(parser):
 def add_rollout_params(parser):
     parser.add_argument('--nsteps_per_seg', type=int, default=128)
     parser.add_argument('--nsegs_per_env', type=int, default=1)
-    parser.add_argument('--envs_per_process', type=int, default=128)
+    parser.add_argument('--envs_per_process', type=int, default=4)
     parser.add_argument('--nlumps', type=int, default=1)
 
 

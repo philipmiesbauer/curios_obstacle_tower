@@ -352,9 +352,9 @@ def make_robo_hockey(frame_stack=True):
     env = AddRandomStateToInfo(env)
     return env
 
-def make_obstacle_tower():
+def make_obstacle_tower(worker_id=0):
     from obstacle_tower_env import ObstacleTowerEnv
 
-    env = ObstacleTowerEnv('./obstacle-tower-env/ObstacleTower/ObstacleTower.x86_64', retro=True, realtime_mode=True)
+    env = ObstacleTowerEnv('./obstacle-tower-env/ObstacleTower/ObstacleTower.x86_64', retro=True, realtime_mode=True, worker_id=worker_id)
     return env
 
