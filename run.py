@@ -113,6 +113,13 @@ class Trainer(object):
 
     def train(self):
         self.agent.start_interaction(self.envs, nlump=self.hps['nlumps'], dynamics=self.dynamics)
+        save_path = 'models'
+        tf_sess = tf.get_default_session()
+	# Create a saver.
+        saver = tf.train.Saver(save_relative_paths=True)
+        # if self.hps['restore_latest_checkpoint']:
+            # Restore latest checkpoint if set in arguments
+            # saver.restore(tf_sess, tf.train.latest_checkpoint(save_path))
         while True:
             info = self.agent.step()
             if info['update']:
@@ -120,7 +127,13 @@ class Trainer(object):
                 logger.dumpkvs()
             if self.agent.rollout.stats['tcount'] > self.num_timesteps:
                 break
+            # Saving the model every 1,000 steps.
+            if self.agent.rollout.stats['tcount'] % 1000 == 0:
+                # Append the step number to the checkpoint name:
+                saver.save(tf_sess, save_path + '/obstacle_tower', global_step=int(self.agent.rollout.stats['tcount']))
 
+        # Append the step number to the last checkpoint name:
+        saver.save(tf_sess, save_path + '/obstacle_tower', global_step=int(self.agent.rollout.stats['tcount']))
         self.agent.stop_interaction()
 
 
@@ -213,6 +226,7 @@ if __name__ == '__main__':
     parser.add_argument('--layernorm', type=int, default=0)
     parser.add_argument('--feat_learning', type=str, default="none",
                         choices=["none", "idf", "vaesph", "vaenonsph", "pix2pix"])
+    parser.add_argument('--restore_latest_checkpoint', type=bool, default=True)
 
     args = parser.parse_args()
 
