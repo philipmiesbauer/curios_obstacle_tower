@@ -125,10 +125,10 @@ class Trainer(object):
             if info['update']:
                 logger.logkvs(info['update'])
                 logger.dumpkvs()
-            if self.agent.rollout.stats['tcount'] > self.num_timesteps:
+            if self.agent.rollout.stat['tcount'] > self.num_timesteps:
                 break
             # Saving the model every 1,000 steps.
-            if self.agent.rollout.stats['tcount'] % 1000 == 0:
+            if info['n_updates'] % 1000 == 0:
                 # Append the step number to the checkpoint name:
                 saver.save(tf_sess, save_path + '/obstacle_tower', global_step=int(self.agent.rollout.stats['tcount']))
 
