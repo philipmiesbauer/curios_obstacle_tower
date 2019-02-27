@@ -173,7 +173,7 @@ def get_experiment_environment(**args):
     process_seed = args["seed"] + 1000 * MPI.COMM_WORLD.Get_rank()
     process_seed = hash_seed(process_seed, max_bytes=4)
     set_global_seeds(process_seed)
-    setup_mpi_gpus()
+    setup_mpi_gpus(args['force_cpu'])
 
     logger_context = logger.scoped_configure(dir=None,
                                              format_strs=['stdout', 'log',
@@ -200,6 +200,7 @@ def add_optimization_params(parser):
     parser.add_argument('--ent_coeff', type=float, default=0.001)
     parser.add_argument('--nepochs', type=int, default=3)
     parser.add_argument('--num_timesteps', type=int, default=int(1e8))
+    parser.add_argument('--force_cpu', type=bool, default=False)
 
 
 def add_rollout_params(parser):

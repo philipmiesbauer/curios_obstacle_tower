@@ -57,18 +57,20 @@ def guess_available_gpus(n_gpus=None):
     raise Exception("Couldn't guess the available gpus on this machine")
 
 
-def setup_mpi_gpus():
+def setup_mpi_gpus(force_cpu=False):
     """
     Set CUDA_VISIBLE_DEVICES using MPI.
     """
-    available_gpus = guess_available_gpus(0)
+    if not force_cpu:
+        available_gpus = guess_available_gpus()
 
-    node_id = platform.node()
-    nodes_ordered_by_rank = MPI.COMM_WORLD.allgather(node_id)
-    processes_outranked_on_this_node = [n for n in nodes_ordered_by_rank[:MPI.COMM_WORLD.Get_rank()] if n == node_id]
-    local_rank = len(processes_outranked_on_this_node)
-    # os.environ['CUDA_VISIBLE_DEVICES'] = str(available_gpus[local_rank])
-    os.environ['CUDA_VISIBLE_DEVICES'] = "-1"
+        node_id = platform.node()
+        nodes_ordered_by_rank = MPI.COMM_WORLD.allgather(node_id)
+        processes_outranked_on_this_node = [n for n in nodes_ordered_by_rank[:MPI.COMM_WORLD.Get_rank()] if n == node_id]
+        local_rank = len(processes_outranked_on_this_node)
+        os.environ['CUDA_VISIBLE_DEVICES'] = str(available_gpus[local_rank])
+    else:
+        os.environ['CUDA_VISIBLE_DEVICES'] = "-1"
 
 
 def guess_available_cpus():
