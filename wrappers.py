@@ -354,7 +354,18 @@ def make_robo_hockey(frame_stack=True):
 
 def make_obstacle_tower(worker_id=0):
     from obstacle_tower_env import ObstacleTowerEnv
+    from sys import platform, exit
 
-    env = ObstacleTowerEnv('./obstacle-tower-env/ObstacleTower/ObstacleTower.x86_64', retro=True, realtime_mode=True, worker_id=worker_id)
+    exe_path = ""
+    if platform.system() == 'Windows':
+        exe_path = './obstacle_tower/OstacleTower_Win/obstacletower.exe'
+    elif platform.system() == 'Linux':
+        exe_path = './obstacle_tower/ObstacleTower_Lin/obstacletower.x86_64'
+
+    if exe_path == "":
+        print("Unknown Operating System")
+        exit(-1)
+
+    env = ObstacleTowerEnv(exe_path, retro=True, realtime_mode=True, worker_id=worker_id)
     return env
 
