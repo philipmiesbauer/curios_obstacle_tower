@@ -23,6 +23,7 @@ from wrappers import MontezumaInfoWrapper, make_mario_env, make_robo_pong, make_
     make_multi_pong, make_obstacle_tower, AddRandomStateToInfo, MaxAndSkipEnv, ProcessFrame84, \
     ExtraTimeLimit
 
+logdir = ""
 
 def start_experiment(**args):
     make_env = partial(make_env_all_params, add_monitor=True, args=args)
@@ -106,8 +107,8 @@ class Trainer(object):
         self.ob_space, self.ac_space = env.observation_space, env.action_space
         self.ob_mean, self.ob_std = random_agent_ob_mean_std(env)
         env.close()
-        print("Waiting for 1 minute to make sure socket is closed on Linux")
-        sleep(60)
+        #print("Waiting for 1 minute to make sure socket is closed on Linux")
+        #sleep(60)
         del env
         self.envs = [functools.partial(self.make_env, i) for i in range(self.envs_per_process)]
 
@@ -120,20 +121,26 @@ class Trainer(object):
         # if self.hps['restore_latest_checkpoint']:
             # Restore latest checkpoint if set in arguments
             # saver.restore(tf_sess, tf.train.latest_checkpoint(save_path))
+        max_ext_rew = 0
         while True:
             info = self.agent.step()
             if info['update']:
                 logger.logkvs(info['update'])
                 logger.dumpkvs()
-            if self.agent.rollout.stat['tcount'] > self.num_timesteps:
+            if self.agent.rollout.stats['tcount'] > self.num_timesteps:
                 break
             # Saving the model every 1,000 steps.
-            if info['n_updates'] % 1000 == 0:
+            if info['update']['n_updates'] % 1000 == 0:
                 # Append the step number to the checkpoint name:
-                saver.save(tf_sess, save_path + '/obstacle_tower', global_step=int(self.agent.rollout.stats['tcount']))
-
+                saver.save(tf_sess, osp.join(save_path, 'obstacle_tower') , global_step=int(self.agent.rollout.stats['tcount']))
+            # Saving the model with highest reward
+            if 'best_ext_ret' in info['update']:
+                if info['update']['best_ext_ret'] >= max_ext_rew:
+                    max_ext_rew = info['update']['best_ext_ret']
+                    saver.save(tf_sess, osp.join(save_path, 'obstacle_tower_max_rew') , global_step=int(max_ext_rew))
+            
         # Append the step number to the last checkpoint name:
-        saver.save(tf_sess, save_path + '/obstacle_tower', global_step=int(self.agent.rollout.stats['tcount']))
+        saver.save(tf_sess, osp.join(save_path, 'obstacle_tower'), global_step=int(self.agent.rollout.stats['tcount']))
         self.agent.stop_interaction()
 
 
@@ -162,7 +169,7 @@ def make_env_all_params(rank, add_monitor, args):
         env = make_obstacle_tower(rank)
 
     if add_monitor:
-        env = Monitor(env, osp.join(logger.get_dir(), '%.2i' % rank))
+        env = Monitor(env, osp.join(logdir, '%.2i' % rank))
     return env
 
 
